@@ -1,26 +1,53 @@
 # DDC Switcher · 显示器输入源快捷切换
 
-A native macOS menu-bar app for switching monitor inputs over DDC/CI with global keyboard shortcuts. Apple Silicon · macOS 13+ · MIT.
+用全局组合快捷键，通过 **DDC/CI** 切换显示器的 HDMI、DisplayPort、USB-C 等输入源。
 
-English: [README.en.md](README.en.md)
+**macOS 菜单栏 · Windows 系统托盘 · 可选登录自启动 · MIT 开源**
 
-原生桌面工具：macOS 菜单栏版与 Windows 系统托盘版。为 HDMI、DisplayPort、USB-C 等输入源设置全局组合快捷键，也可直接从菜单选择输入源。
+A native macOS menu-bar and Windows tray app for switching monitor inputs over DDC/CI, with configurable global shortcuts and optional launch at login.
 
-| 平台 | 系统要求 | 使用说明 |
-| --- | --- | --- |
-| Windows | Windows 10/11 x64 | [Windows 版说明](windows/README.md) |
-| macOS | macOS 13+、Apple Silicon | 下方说明 |
+[English](README.en.md) · [下载最新版](https://github.com/Lee8000/DDCSwitcher/releases/latest) · [Windows 使用说明](windows/README.md) · [MIT 许可证](LICENSE)
 
-Windows 版无需额外运行时。macOS 与 Windows 各自保存显示器及快捷键配置。
+## 主要功能
 
-macOS 版适用：**Apple Silicon（M1 及以后）Mac，macOS 13 或更新版本**。已验证的本地构建与软件测试环境为 Apple M4 / macOS 26.6.2。需要支持 DDC/CI 的外接显示器和能传递 DDC 信号的连接方式。无需 Homebrew、Python、辅助功能权限或屏幕录制权限。
+- **全局组合快捷键**：为每个输入源分别录制快捷键，也可从菜单栏或托盘菜单触发。
+- **多个显示器与切换动作**：按稳定设备标识保存目标；设备断开时拒绝切换，不自动改选其他显示器。
+- **输入源预设与自定义代码**：支持常见 HDMI、DisplayPort、USB-C 预设和 0–65535 十进制代码；macOS 另提供 LG 兼容控制方式。
+- **后台驻留与登录自启动**：关闭设置窗口后继续响应快捷键；两平台均可选择“登录后自动启动”，默认关闭。
+- **本地保存设置**：更新应用保留已有输入源与快捷键；提供损坏设置的备份重置和不控制硬件的演示模式。
 
-## 下载
+## 下载与系统要求
 
-前往 [GitHub Releases](https://github.com/Lee8000/DDCSwitcher/releases/latest) 下载对应平台版本：
+当前版本：[v1.2.0](https://github.com/Lee8000/DDCSwitcher/releases/tag/v1.2.0)，macOS 与 Windows 均已加入登录后自动启动选项。
 
-- [Windows x64](https://github.com/Lee8000/DDCSwitcher/releases/download/v1.2.0/DDCSwitcher-v1.2.0-windows-x64.zip)
-- [macOS Apple Silicon](https://github.com/Lee8000/DDCSwitcher/releases/download/v1.2.0/DDCSwitcher-v1.2.0-macOS-arm64.zip)
+| 平台 | 系统要求 | 下载 | 使用说明 |
+| --- | --- | --- | --- |
+| macOS | macOS 13+，Apple Silicon（M1 及以后） | [macOS arm64 ZIP](https://github.com/Lee8000/DDCSwitcher/releases/download/v1.2.0/DDCSwitcher-v1.2.0-macOS-arm64.zip) | [macOS 开始使用](#macos-开始使用) |
+| Windows | Windows 10/11，x64 | [Windows x64 ZIP](https://github.com/Lee8000/DDCSwitcher/releases/download/v1.2.0/DDCSwitcher-v1.2.0-windows-x64.zip) | [Windows 完整说明](windows/README.md) |
+
+[SHA-256 校验文件](https://github.com/Lee8000/DDCSwitcher/releases/download/v1.2.0/DDCSwitcher-v1.2.0-SHA256SUMS.txt) · [全部版本](https://github.com/Lee8000/DDCSwitcher/releases)
+
+两端都需要支持 DDC/CI 的外接显示器，并在显示器自身菜单中开启 DDC/CI；线材、扩展坞和驱动需要能够传递控制信号。预设代码不保证适用于每个型号。Windows 版解压即可运行，无需额外安装 .NET、Python 或 Visual C++ 运行时，也无需管理员权限。两平台各自保存配置。
+
+## 登录后自动启动
+
+先把应用放在准备长期保存的位置，再在设置窗口勾选 **“登录后自动启动”**。勾选或取消立即生效，无需保存切换动作；默认关闭，仅影响当前用户。登录后加载已保存的快捷键并驻留菜单栏或托盘，不会自动发送输入源切换命令。
+
+| 平台 | 设置与注意事项 |
+| --- | --- |
+| macOS | 建议放在“应用程序”中。若提示需要批准，点击“系统登录项…”并在系统设置中允许。 |
+| Windows | 移动程序后，关闭再开启该选项以更新路径。复选框显示启动项是否已注册；若曾在任务管理器禁用，需在“设置 → 应用 → 启动”中重新允许。 |
+
+演示模式禁用自启动选项。卸载前请先取消该选项。实际重启登录的验证范围见[验证记录](docs/VERIFICATION.md)。
+
+## Windows 开始使用
+
+1. 解压 Windows 包，把文件夹放到固定位置，双击 `DDCSwitcher.exe`。
+2. 在显示器菜单中启用 DDC/CI，点击“刷新显示器”；建议直连并使用扩展显示模式。
+3. 添加动作，选择显示器和输入源，录制 **Ctrl+Alt+1** 等组合键，再点击“保存并启用”。
+4. 为其他输入源添加不同快捷键。关闭窗口后程序驻留托盘；双击托盘图标可打开设置，右击可切换输入源或退出。
+
+完整的输入代码、连接限制、配置位置及构建步骤见 [Windows 使用说明](windows/README.md)。
 
 ## macOS 开始使用
 
@@ -33,15 +60,15 @@ macOS 版适用：**Apple Silicon（M1 及以后）Mac，macOS 13 或更新版�
 
 关闭设置窗口后，应用继续在菜单栏运行。点击显示器图标可切换输入源、打开设置或退出。退出后快捷键释放。第一次运行没有预设快捷键，也不会自动切换显示器。
 
-设置窗口中的“登录后自动启动”默认关闭，勾选或取消立即生效，无需保存动作。该选项使用系统登录项，只影响当前用户；如提示需要批准，点击“系统登录项…”并在系统设置中允许。建议先把应用放在“应用程序”等固定位置，再启用。登录后加载已保存快捷键并在菜单栏运行，不会自动切换输入源。演示模式禁用此选项。
+需要随登录启动时，按上方[登录后自动启动](#登录后自动启动)说明开启即可。macOS 版无需安装 Homebrew 或 Python，也不需要辅助功能或屏幕录制权限。
 
 本地构建采用临时签名，未使用 Apple Developer ID 公证。若 macOS 拦截你确认来源的应用，可在尝试打开后进入“系统设置 → 隐私与安全性”中使用系统提供的打开选项。本项目不要求关闭 Gatekeeper。
 
-## 输入源代码
+## 输入源控制代码
 
 设置中的下拉菜单提供这些常见值；**它们不保证适用于每个型号**。具体型号可使用自定义十进制代码（0–65535）。
 
-| 输入源 | 标准 DDC/CI | LG 兼容方式 |
+| 输入源 | 标准 DDC/CI | LG 兼容方式（仅 macOS） |
 | --- | ---: | ---: |
 | DisplayPort 1 | 15 | 208 |
 | DisplayPort 2 | 16 | 209 |
@@ -60,9 +87,9 @@ macOS 版适用：**Apple Silicon（M1 及以后）Mac，macOS 13 或更新版�
 - 快捷键冲突会在保存时提示；保存失败会保留原有设置和注册。某些前台应用或系统保留组合可能拦截按键，请换组合键测试。
 - 同一时间只发一个切换动作，并抑制短时间连续触发。显示器断开后拒绝执行，不会自动改为操作其他显示器。
 - 设置仅保存在 `~/Library/Application Support/DDCSwitcher/settings.json`。损坏文件不会被静默覆盖，可用设置窗口中的备份重置按钮恢复。更新应用后设置仍会保留。
-- 卸载时先从菜单栏退出，再移走应用。若不再需要配置，可手动移走上述设置文件夹。卸载前请先取消“登录后自动启动”，或到系统设置移除登录项。
+- 卸载前先取消“登录后自动启动”或在系统设置移除本应用的登录项，再从菜单栏退出并移走应用。若不再需要配置，可手动移走上述设置文件夹。
 
-## 从源码构建
+## macOS 源码构建
 
 需要 Xcode 或 Apple Command Line Tools（Swift、clang、make、codesign、iconutil）。无外部 Swift 包依赖，m1ddc 源码与许可证已包含。
 
