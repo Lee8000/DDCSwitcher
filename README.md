@@ -13,7 +13,7 @@ English: [README.en.md](README.en.md)
 
 Windows 版无需额外运行时。macOS 与 Windows 各自保存显示器及快捷键配置。
 
-适用：**Apple Silicon（M1 及以后）Mac，macOS 13 或更新版本**。已验证的本地构建与软件测试环境为 Apple M4 / macOS 26.6.2。需要支持 DDC/CI 的外接显示器和能传递 DDC 信号的连接方式。无需 Homebrew、Python、辅助功能权限或屏幕录制权限。
+macOS 版适用：**Apple Silicon（M1 及以后）Mac，macOS 13 或更新版本**。已验证的本地构建与软件测试环境为 Apple M4 / macOS 26.6.2。需要支持 DDC/CI 的外接显示器和能传递 DDC 信号的连接方式。无需 Homebrew、Python、辅助功能权限或屏幕录制权限。
 
 ## 下载
 

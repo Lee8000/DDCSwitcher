@@ -4,6 +4,18 @@
 
 ## 已完成
 
+### Windows v1.1.0
+
+- 本地 AppleClang 执行可移植 C++ 核心测试：33 项检查，0 失败。覆盖输入值、设备身份、重复快捷键、事务回滚、配置文本往返与损坏、命令行转义、镜像设备和不完整显示配置。
+- 本地 MinGW-w64 交叉编译完整 Windows x64 程序成功。
+- [GitHub Windows / macOS CI](https://github.com/Lee8000/DDCSwitcher/actions/runs/38909765214) 两个平台任务全部成功；Windows 使用 MSVC Release x64 与静态运行时构建。
+- Windows 原生自检：14 项检查，0 失败，包括实际文件原子保存、Unicode 往返、损坏文件保留/备份、错误保存保护、模拟显示器控制子进程成功/失败、Job 超时终止、RegisterHotKey 注册及 WM_HOTKEY 消息分发、暂停和清理。
+- 独立代码检查发现的不完整显示拓扑可能漏计镜像目标问题已补充失败回归测试并修复；复查通过。同型号显示器增加稳定区分标识。
+- **Windows GUI 未在实体 Windows 桌面上进行视觉验收，实体键盘全局触发与真实显示器输入切换未验证。** 自检只向测试窗口投递 WM_HOTKEY，控制进程只使用模拟后端，没有合成按键或真实 DDC 写入。请在目标 Windows 电脑使用菜单手动切换，再用实体键盘验证。
+- Windows 程序未进行 Authenticode 签名。发布包不要求另装 .NET、Python 或 Visual C++ 运行时；系统提供所需 Windows DLL。
+
+### macOS
+
 - 环境：Apple M4、arm64、macOS 26.6.2，Swift 6.2.3、Xcode macOS 26.2 SDK。
 - `bash scripts/build.sh`：Release 构建成功，应用和 m1ddc 均为 arm64，Mach-O 最低部署版本均为 macOS 13.0。
 - `codesign --verify --deep --strict`：应用临时签名验证通过。未提供 Developer ID 签名或 Apple 公证。
