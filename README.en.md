@@ -10,6 +10,10 @@ A native macOS menu-bar app that switches external monitor inputs over DDC/CI us
 - An external monitor with DDC/CI enabled, connected through a cable/adapter that passes DDC commands.
 - No Homebrew, screen recording permission or accessibility permission is required to run the packaged app.
 
+## Download
+
+Get the app from [GitHub Releases](https://github.com/Lee8000/DDCSwitcher/releases/latest), or download [v1.0.0 for Apple Silicon](https://github.com/Lee8000/DDCSwitcher/releases/download/v1.0.0/DDCSwitcher-v1.0.0-macOS-arm64.zip) directly.
+
 ## Use
 
 1. Open `DDCSwitcher.app` and enable DDC/CI in the monitor's on-screen menu.

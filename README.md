@@ -8,6 +8,10 @@ English: [README.en.md](README.en.md)
 
 适用：**Apple Silicon（M1 及以后）Mac，macOS 13 或更新版本**。已验证的本地构建与软件测试环境为 Apple M4 / macOS 26.6.2。需要支持 DDC/CI 的外接显示器和能传递 DDC 信号的连接方式。无需 Homebrew、Python、辅助功能权限或屏幕录制权限。
 
+## 下载
+
+前往 [GitHub Releases](https://github.com/Lee8000/DDCSwitcher/releases/latest) 下载应用，或直接下载 [v1.0.0 Apple Silicon 版本](https://github.com/Lee8000/DDCSwitcher/releases/download/v1.0.0/DDCSwitcher-v1.0.0-macOS-arm64.zip)。
+
 ## 开始使用
 
 1. 解压应用包，把 `DDCSwitcher.app` 放在“应用程序”或你希望长期保存的位置，然后双击打开。
