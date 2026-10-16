@@ -2,8 +2,8 @@
 101 ICON "app.ico"
 1 RT_MANIFEST "app.manifest"
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION 1,1,0,0
-PRODUCTVERSION 1,1,0,0
+FILEVERSION 1,2,0,0
+PRODUCTVERSION 1,2,0,0
 FILEOS VOS_NT_WINDOWS32
 FILETYPE VFT_APP
 BEGIN
@@ -13,9 +13,9 @@ BEGIN
   BEGIN
    VALUE "CompanyName", "DDC Switcher contributors\0"
    VALUE "FileDescription", "DDC Switcher for Windows\0"
-   VALUE "FileVersion", "1.1.0\0"
+   VALUE "FileVersion", "1.2.0\0"
    VALUE "ProductName", "DDC Switcher\0"
-   VALUE "ProductVersion", "1.1.0\0"
+   VALUE "ProductVersion", "1.2.0\0"
   END
  END
  BLOCK "VarFileInfo"

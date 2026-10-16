@@ -19,8 +19,8 @@ macOS 版适用：**Apple Silicon（M1 及以后）Mac，macOS 13 或更新版�
 
 前往 [GitHub Releases](https://github.com/Lee8000/DDCSwitcher/releases/latest) 下载对应平台版本：
 
-- [Windows x64](https://github.com/Lee8000/DDCSwitcher/releases/download/v1.1.0/DDCSwitcher-v1.1.0-windows-x64.zip)
-- [macOS Apple Silicon](https://github.com/Lee8000/DDCSwitcher/releases/download/v1.1.0/DDCSwitcher-v1.1.0-macOS-arm64.zip)
+- [Windows x64](https://github.com/Lee8000/DDCSwitcher/releases/download/v1.2.0/DDCSwitcher-v1.2.0-windows-x64.zip)
+- [macOS Apple Silicon](https://github.com/Lee8000/DDCSwitcher/releases/download/v1.2.0/DDCSwitcher-v1.2.0-macOS-arm64.zip)
 
 ## macOS 开始使用
 
@@ -33,7 +33,7 @@ macOS 版适用：**Apple Silicon（M1 及以后）Mac，macOS 13 或更新版�
 
 关闭设置窗口后，应用继续在菜单栏运行。点击显示器图标可切换输入源、打开设置或退出。退出后快捷键释放。第一次运行没有预设快捷键，也不会自动切换显示器。
 
-若希望登录后启动，可在“系统设置 → 通用 → 登录项与扩展”中自行添加此应用。应用不会自动修改登录项。
+设置窗口中的“登录后自动启动”默认关闭，勾选或取消立即生效，无需保存动作。该选项使用系统登录项，只影响当前用户；如提示需要批准，点击“系统登录项…”并在系统设置中允许。建议先把应用放在“应用程序”等固定位置，再启用。登录后加载已保存快捷键并在菜单栏运行，不会自动切换输入源。演示模式禁用此选项。
 
 本地构建采用临时签名，未使用 Apple Developer ID 公证。若 macOS 拦截你确认来源的应用，可在尝试打开后进入“系统设置 → 隐私与安全性”中使用系统提供的打开选项。本项目不要求关闭 Gatekeeper。
 
@@ -60,7 +60,7 @@ macOS 版适用：**Apple Silicon（M1 及以后）Mac，macOS 13 或更新版�
 - 快捷键冲突会在保存时提示；保存失败会保留原有设置和注册。某些前台应用或系统保留组合可能拦截按键，请换组合键测试。
 - 同一时间只发一个切换动作，并抑制短时间连续触发。显示器断开后拒绝执行，不会自动改为操作其他显示器。
 - 设置仅保存在 `~/Library/Application Support/DDCSwitcher/settings.json`。损坏文件不会被静默覆盖，可用设置窗口中的备份重置按钮恢复。更新应用后设置仍会保留。
-- 卸载时先从菜单栏退出，再移走应用。若不再需要配置，可手动移走上述设置文件夹及自行添加的登录项。
+- 卸载时先从菜单栏退出，再移走应用。若不再需要配置，可手动移走上述设置文件夹。卸载前请先取消“登录后自动启动”，或到系统设置移除登录项。
 
 ## 从源码构建
 

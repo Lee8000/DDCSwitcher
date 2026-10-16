@@ -17,6 +17,11 @@ final class SettingsWindowController: NSWindowController, NSTableViewDataSource,
     private let status = NSTextField(wrappingLabelWithString: "正在查找外接显示器…")
     private let refreshButton = NSButton(title: "刷新显示器", target: nil, action: nil)
     private let resetButton = NSButton(title: "备份并重置损坏设置", target: nil, action: nil)
+    private let loginItem = NSButton(checkboxWithTitle: "登录后自动启动", target: nil, action: nil)
+    private let loginStatus = NSTextField(wrappingLabelWithString: "")
+    private let loginSettings = NSButton(title: "系统登录项…", target: nil, action: nil)
+    private var loginController: LoginItemController?
+    var onOpenLoginSettings: (() -> Void)?
     private var loading = false
     var onSave: ((Configuration) throws -> Void)?
     var onSwitch: ((UUID) -> Void)?
@@ -150,6 +155,15 @@ final class SettingsWindowController: NSWindowController, NSTableViewDataSource,
         resetButton.target = self; resetButton.action = #selector(resetSettings); resetButton.isHidden = true
         root.addArrangedSubview(stack([refreshButton, button("设置文件夹", action: #selector(reveal)),
                                       button("使用说明", action: #selector(help)), resetButton], spacing: 8))
+        loginItem.target = self; loginItem.action = #selector(toggleLoginItem)
+        loginItem.setAccessibilityLabel("登录后自动启动")
+        loginSettings.target = self; loginSettings.action = #selector(openLoginSettings)
+        loginStatus.font = .systemFont(ofSize: 11); loginStatus.textColor = .secondaryLabelColor
+        loginStatus.maximumNumberOfLines = 2
+        let loginRow = stack([loginItem, loginStatus, loginSettings], spacing: 10)
+        root.addArrangedSubview(loginRow)
+        loginRow.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
+        loginStatus.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         status.font = .systemFont(ofSize: 11)
         status.maximumNumberOfLines = 3; status.lineBreakMode = .byTruncatingTail
         root.addArrangedSubview(status)
@@ -295,6 +309,28 @@ final class SettingsWindowController: NSWindowController, NSTableViewDataSource,
     }
     func setRecoveryNeeded(_ needed: Bool) { resetButton.isHidden = !needed }
     func replaceDraft(_ configuration: Configuration) { draft = configuration; reloadList(select: draft.actions.first?.id) }
+    func configureLoginItem(_ controller: LoginItemController, isDemo: Bool) {
+        loginController = controller
+        loginItem.isEnabled = !isDemo
+        loginSettings.isEnabled = !isDemo
+        refreshLoginItem()
+    }
+    private func refreshLoginItem(error: String? = nil) {
+        guard let controller = loginController else { return }
+        controller.refresh()
+        loginItem.state = controller.state.isChecked ? .on : .off
+        let message = loginItem.isEnabled ? controller.state.message : "演示模式不修改登录项。"
+        loginStatus.stringValue = error.map { "修改失败：\($0)" } ?? message
+        loginStatus.toolTip = loginStatus.stringValue
+        loginStatus.textColor = error != nil ? .systemRed : .secondaryLabelColor
+    }
+    @objc private func toggleLoginItem() {
+        recorder.stop()
+        do { try loginController?.setEnabled(loginItem.state == .on); refreshLoginItem() }
+        catch { refreshLoginItem(error: error.localizedDescription); NSSound.beep() }
+    }
+    @objc private func openLoginSettings() { onOpenLoginSettings?() }
+    func windowDidBecomeKey(_ notification: Notification) { refreshLoginItem() }
     func windowWillClose(_ notification: Notification) { recorder.stop() }
     func windowDidResignKey(_ notification: Notification) { recorder.stop() }
 }

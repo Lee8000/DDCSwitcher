@@ -1,4 +1,6 @@
 #include "platform.hpp"
+#include "startup.hpp"
+#include <shellapi.h>
 #include <fstream>
 #include <chrono>
 #include <sstream>
@@ -10,6 +12,30 @@ int selfTest(const std::filesystem::path& report) {
     auto folder=std::filesystem::temp_directory_path()/wide("DDCSwitcher-test-"+newID());
     try {
         std::filesystem::create_directories(folder);
+        // Dedicated per-run HKCU key: never touch the user's real Run entry.
+        auto testKey=wide("Software\\DDCSwitcherTests\\"+newID());
+        struct RegistryCleanup { std::wstring key; ~RegistryCleanup(){RegDeleteTreeW(HKEY_CURRENT_USER,key.c_str());} } registryCleanup{testKey};
+        StartupRegistration startup(HKEY_CURRENT_USER,testKey);
+        auto startupExe=std::filesystem::path(L"C:\\测试 空格\\DDCSwitcher.exe");
+        check(!startup.state(startupExe).registered,"startup defaults off");
+        startup.setEnabled(true,startupExe);
+        check(startup.state(startupExe).registered && startup.state(startupExe).currentPath,"startup enables current Unicode path");
+        int argc=0;auto argv=CommandLineToArgvW(startup.command().c_str(),&argc);
+        check(argv && argc==1 && argv[0]==startupExe.native(),"startup command preserves exact executable argument");
+        if(argv)LocalFree(argv);
+        check(!startup.state(L"C:\\moved\\DDCSwitcher.exe").currentPath,"moved executable is detected");
+        bool invalidStartup=false;
+        try{startup.setEnabled(true,std::filesystem::path(L"C:\\"+std::wstring(260,L'a')+L".exe"));}catch(...){invalidStartup=true;}
+        check(invalidStartup && startup.state(startupExe).currentPath,"overlong startup command preserves old registration");
+        HKEY sibling=nullptr;RegOpenKeyExW(HKEY_CURRENT_USER,testKey.c_str(),0,KEY_SET_VALUE,&sibling);
+        DWORD marker=42;RegSetValueExW(sibling,L"OtherApp",0,REG_DWORD,reinterpret_cast<const BYTE*>(&marker),sizeof(marker));RegCloseKey(sibling);
+        startup.setEnabled(false,startupExe);startup.setEnabled(false,startupExe);
+        check(!startup.state(startupExe).registered,"startup disables idempotently");
+        DWORD after=0,size=sizeof(after);RegGetValueW(HKEY_CURRENT_USER,testKey.c_str(),L"OtherApp",RRF_RT_REG_DWORD,nullptr,&after,&size);
+        check(after==42,"disable preserves unrelated registry values");
+        bool accessFailure=false;
+        try{StartupRegistration denied(nullptr,L"invalid-root");denied.setEnabled(true,startupExe);}catch(...){accessFailure=true;}
+        check(accessFailure,"startup write failure is reported");
         auto file=folder/L"settings.txt";
         Action a{"a","测试输入源","demo:monitor-1",17,{7,0x79},true};
         check(loadSettings(file).empty(),"missing settings starts empty");

@@ -1,4 +1,5 @@
 #include "platform.hpp"
+#include "startup.hpp"
 #include <commctrl.h>
 #include <shellapi.h>
 #include <chrono>
@@ -9,10 +10,12 @@
 namespace {
 using namespace ddc;
 constexpr UINT DONE=WM_APP+1,TRAY=WM_APP+2;
-enum { LIST=100,NAME,MONITOR,PRESET,VALUE,RECORD,CLEAR,ENABLED,ADD,REMOVE,REFRESH,HELP,FOLDER,RESET,SAVE,SWITCH,OPEN=9000,QUIT };
+enum { LIST=100,NAME,MONITOR,PRESET,VALUE,RECORD,CLEAR,ENABLED,ADD,REMOVE,REFRESH,HELP,FOLDER,RESET,SAVE,SWITCH,STARTUP,OPEN=9000,QUIT };
 struct Completion { bool listing; WorkerResult result; };
 class App {
     HWND window=nullptr,list=nullptr,name=nullptr,monitor=nullptr,preset=nullptr,value=nullptr,record=nullptr,enabled=nullptr,status=nullptr,reset=nullptr;
+    HWND startup=nullptr,startupStatus=nullptr;
+    StartupRegistration startupRegistration;
     std::vector<HWND> fields;
     HFONT font=nullptr,headingFont=nullptr;
     UINT dpi=96,taskbarCreated=0;
@@ -163,7 +166,24 @@ class App {
         if(command>=10000&&command-10000<ids.size())trigger(ids[command-10000]);
         else if(command)onCommand(command,0);
     }
-    void show(){ShowWindow(window,SW_SHOWNORMAL);SetForegroundWindow(window);}
+    void refreshStartup(const std::string& error={}) {
+        if(!startup)return;
+        if(demo){EnableWindow(startup,FALSE);SetWindowTextW(startupStatus,L"演示模式不修改登录启动项。");return;}
+        try {
+            auto actual=startupRegistration.state(exePath());
+            SendMessageW(startup,BM_SETCHECK,actual.registered?BST_CHECKED:BST_UNCHECKED,0);
+            auto message=actual.registered?(actual.currentPath?L"已注册；系统禁用需到启动应用中恢复。":L"路径已改变，请关闭再开启以更新。"):L"已关闭；勾选后立即生效。";
+            SetWindowTextW(startupStatus,error.empty()?message:wide("修改失败："+error).c_str());
+            EnableWindow(startup,TRUE);
+        }catch(const std::exception& e){SetWindowTextW(startupStatus,wide("读取失败："+std::string(e.what())).c_str());EnableWindow(startup,FALSE);}
+    }
+    void toggleStartup() {
+        if(demo)return;
+        stopRecording();
+        try{startupRegistration.setEnabled(SendMessageW(startup,BM_GETCHECK,0,0)==BST_CHECKED,exePath());refreshStartup();}
+        catch(const std::exception& e){refreshStartup(e.what());MessageBoxW(window,wide(e.what()).c_str(),L"无法修改登录启动项",MB_OK|MB_ICONWARNING);}
+    }
+    void show(){refreshStartup();ShowWindow(window,SW_SHOWNORMAL);SetForegroundWindow(window);}
     void onCommand(unsigned command,unsigned notification) {
         if(loading)return;
         if(command==LIST&&notification==LBN_SELCHANGE){collect();selected=static_cast<int>(SendMessageW(list,LB_GETCURSEL,0,0));loadEditor();return;}
@@ -173,11 +193,12 @@ class App {
         case ADD:{stopRecording();collect();draft.push_back({newID(),"HDMI 1",monitors.empty()?"":monitors[0].id,17,{},true});reloadList(static_cast<int>(draft.size()-1));SetFocus(name);break;}
         case REMOVE:stopRecording();if(validSelection()){draft.erase(draft.begin()+selected);reloadList(selected);}break;
         case SAVE:save();break;
+        case STARTUP:toggleStartup();break;
         case SWITCH:if(validSelection()&&save())trigger(draft[static_cast<size_t>(selected)].id);break;
         case REFRESH:start(true);break;
         case RECORD:if(validSelection()){if(recording)stopRecording();else{hotkeys.pause();recording=true;SetFocus(record);SetWindowTextW(record,L"请按组合键… Esc 取消");}}break;
         case CLEAR:stopRecording();if(validSelection()){draft[static_cast<size_t>(selected)].shortcut={};SetWindowTextW(record,L"点击录制快捷键");}break;
-        case HELP:MessageBoxW(window,L"1. 在显示器菜单中启用 DDC/CI，连接后刷新。\n2. 添加动作，选择显示器与输入源。\n3. 录制 Ctrl+Alt+1 等组合键，再保存。\n4. 关闭设置窗口后，使用快捷键或托盘菜单切换。\n\n预设代码不保证适用于所有型号，可自定义 0–65535。请使用扩展显示模式；镜像或多物理设备映射存在歧义时不会猜测目标。\n\n切到其他电脑后，原端口可能断开 DDC，届时需用显示器按键或另一台电脑切回。命令成功不代表显示器已确认切换。",L"使用说明",MB_OK|MB_ICONINFORMATION);break;
+        case HELP:MessageBoxW(window,L"1. 在显示器菜单中启用 DDC/CI，连接后刷新。\n2. 添加动作，选择显示器与输入源。\n3. 录制 Ctrl+Alt+1 等组合键，再保存。\n4. 关闭设置窗口后，使用快捷键或托盘菜单切换。\n5. 勾选“登录后自动启动”立即生效；无需保存动作。\n\n自启动仅针对当前用户。请先将程序放在固定位置；移动后关闭再开启此选项更新路径。若在任务管理器禁用，请到“设置 → 应用 → 启动”恢复。\n\n预设代码不保证适用于所有型号，可自定义 0–65535。请使用扩展显示模式；镜像或多物理设备映射存在歧义时不会猜测目标。\n\n切到其他电脑后，原端口可能断开 DDC，届时需用显示器按键或另一台电脑切回。命令成功不代表显示器已确认切换。",L"使用说明",MB_OK|MB_ICONINFORMATION);break;
         case FOLDER:std::filesystem::create_directories(file.parent_path());ShellExecuteW(window,L"open",file.parent_path().c_str(),nullptr,nullptr,SW_SHOWNORMAL);break;
         case RESET:if(recovery&&MessageBoxW(window,L"将保留原设置为备份文件，然后重新配置。继续？",L"备份并重置",MB_YESNO|MB_ICONQUESTION)==IDYES){backupSettings(file);saved.clear();draft.clear();recovery=false;ShowWindow(reset,SW_HIDE);reloadList(0);start(true);}break;
         case OPEN:show();break;
@@ -226,6 +247,8 @@ class App {
         control(L"BUTTON",L"清除",CLEAR,WS_TABSTOP,760,367,125,32);
         control(L"STATIC",L"需包含 Ctrl 或 Alt；建议 Ctrl+Alt+1，Esc 取消录制。",0,0,285,407,600,22);
         enabled=control(L"BUTTON",L"启用此动作",ENABLED,WS_TABSTOP|BS_AUTOCHECKBOX,285,446,600,26);
+        startup=control(L"BUTTON",L"登录后自动启动",STARTUP,WS_TABSTOP|BS_AUTOCHECKBOX,285,478,210,26);
+        startupStatus=control(L"STATIC",L"",0,SS_LEFT,505,476,380,32);
         control(L"BUTTON",L"刷新显示器",REFRESH,WS_TABSTOP,24,512,130,32);control(L"BUTTON",L"设置文件夹",FOLDER,WS_TABSTOP,168,512,130,32);control(L"BUTTON",L"使用说明",HELP,WS_TABSTOP,312,512,112,32);
         reset=control(L"BUTTON",L"备份并重置损坏设置",RESET,WS_TABSTOP,440,512,220,32);ShowWindow(reset,SW_HIDE);
         status=control(L"STATIC",L"正在查找显示器…",0,SS_LEFT,24,555,860,38);
@@ -246,7 +269,7 @@ class App {
             case WM_DISPLAYCHANGE:SetTimer(h,1,700,nullptr);return 0;
             case WM_TIMER:if(w==1){KillTimer(h,1);if(app->status)app->start(true);}return 0;
             case WM_CLOSE:app->stopRecording();ShowWindow(h,SW_HIDE);return 0;
-            case WM_ACTIVATE:if(LOWORD(w)==WA_INACTIVE)app->stopRecording();break;
+            case WM_ACTIVATE:if(LOWORD(w)==WA_INACTIVE)app->stopRecording();else app->refreshStartup();break;
             case WM_CTLCOLORSTATIC:SetBkMode(reinterpret_cast<HDC>(w),TRANSPARENT);if(reinterpret_cast<HWND>(l)==app->status)SetTextColor(reinterpret_cast<HDC>(w),app->red?RGB(180,30,30):GetSysColor(COLOR_WINDOWTEXT));return reinterpret_cast<LRESULT>(GetSysColorBrush(COLOR_WINDOW));
             case WM_DESTROY:app->hotkeys.pause();Shell_NotifyIconW(NIM_DELETE,&app->tray);PostQuitMessage(0);return 0;
             default:break;
@@ -267,7 +290,7 @@ public:
         WNDCLASSW cls{};cls.hInstance=GetModuleHandleW(nullptr);cls.lpszClassName=className;cls.lpfnWndProc=procedure;cls.hCursor=LoadCursorW(nullptr,IDC_ARROW);cls.hbrBackground=GetSysColorBrush(COLOR_WINDOW);cls.hIcon=LoadIconW(cls.hInstance,MAKEINTRESOURCEW(101));RegisterClassW(&cls);
         dpi=GetDpiForSystem();RECT rect{0,0,px(915),px(655)};DWORD style=WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX;AdjustWindowRect(&rect,style,FALSE);
         if(!CreateWindowExW(WS_EX_CONTROLPARENT,className,demo?L"DDC Switcher · 演示模式（不控制硬件）":L"DDC Switcher · 输入源快捷切换",style,CW_USEDEFAULT,CW_USEDEFAULT,rect.right-rect.left,rect.bottom-rect.top,nullptr,nullptr,cls.hInstance,this))throw std::runtime_error(systemError("无法创建设置窗口"));
-        createUI();registrar.window=window;
+        createUI();refreshStartup();registrar.window=window;
         std::string loadError;
         try{saved=loadSettings(file);}catch(const std::exception& e){recovery=true;loadError=std::string("设置无法读取，原文件已保留：")+e.what();}
         if(demo&&saved.empty()&&!recovery)saved={{newID(),"工作电脑 · HDMI 1","demo:monitor-1",17,{3,'1'},true},{newID(),"笔记本 · USB-C","demo:monitor-1",27,{3,'2'},true}};

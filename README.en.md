@@ -14,7 +14,7 @@ A native macOS menu-bar and Windows tray app that switches external monitor inpu
 
 ## Download
 
-Get the app from [GitHub Releases](https://github.com/Lee8000/DDCSwitcher/releases/latest): [Windows x64](https://github.com/Lee8000/DDCSwitcher/releases/download/v1.1.0/DDCSwitcher-v1.1.0-windows-x64.zip) or [macOS Apple Silicon](https://github.com/Lee8000/DDCSwitcher/releases/download/v1.1.0/DDCSwitcher-v1.1.0-macOS-arm64.zip).
+Get the app from [GitHub Releases](https://github.com/Lee8000/DDCSwitcher/releases/latest): [Windows x64](https://github.com/Lee8000/DDCSwitcher/releases/download/v1.2.0/DDCSwitcher-v1.2.0-windows-x64.zip) or [macOS Apple Silicon](https://github.com/Lee8000/DDCSwitcher/releases/download/v1.2.0/DDCSwitcher-v1.2.0-macOS-arm64.zip).
 
 ## Use
 
@@ -37,7 +37,7 @@ Standard presets: DP 1 = 15, DP 2 = 16, HDMI 1 = 17, HDMI 2 = 18, USB-C = 27. LG
 - Builds use ad-hoc signing and are not Apple-notarized. Follow the system's standard Privacy & Security flow if macOS blocks a build you trust; do not disable Gatekeeper.
 - The bundled helper uses private macOS display interfaces and runs outside App Sandbox. This is not an App Store app.
 
-Settings are stored locally in `~/Library/Application Support/DDCSwitcher/settings.json`. Invalid settings are preserved and can be backed up/reset from the app. Login items are opt-in through macOS System Settings.
+Settings are stored locally in `~/Library/Application Support/DDCSwitcher/settings.json`. Invalid settings are preserved and can be backed up/reset from the app. The settings window has an opt-in “登录后自动启动” (launch at login) checkbox, off by default. Changes take effect immediately, independently of saving actions. macOS uses SMAppService; if approval is needed, use the adjacent system login-items button. Keep the app at a fixed location before enabling. Existing actions load at login without automatically switching inputs. Demo mode cannot change login items. Disable the option before uninstalling.
 
 ## Build and test
 

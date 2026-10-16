@@ -29,6 +29,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if isDemo, !recoveryNeeded, configuration.actions.isEmpty { configuration = DemoRuntime.configuration }
         settings = SettingsWindowController(configuration: configuration)
         settings.window?.title += isDemo ? " · 演示模式（不控制硬件）" : ""
+        settings.configureLoginItem(LoginItemService.makeController(isDemo: isDemo), isDemo: isDemo)
+        settings.onOpenLoginSettings = { LoginItemService.openSettings() }
         settings.onRecording = { [weak self] in self?.hotkeys.setRecording($0) }
         settings.onSave = { [weak self] config in
             guard let self else { return }
