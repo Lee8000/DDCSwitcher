@@ -1,0 +1,30 @@
+name: macOS tests and build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    runs-on: macos-14
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Test core logic and mocked DDC frames
+        run: bash scripts/test.sh
+      - name: Build Apple Silicon app
+        run: bash scripts/build.sh
+      - name: Archive application
+        run: ditto -c -k --sequesterRsrc --keepParent dist/DDCSwitcher.app dist/DDCSwitcher-macOS-arm64.zip
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: DDCSwitcher-macOS-arm64
+          path: dist/DDCSwitcher-macOS-arm64.zip
+          if-no-files-found: error
+          retention-days: 14

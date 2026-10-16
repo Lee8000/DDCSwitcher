@@ -1,0 +1,7 @@
+.build/
+.swiftpm/
+dist/
+.DS_Store
+.clang-cache/
+ThirdParty/m1ddc/.objects/
+ThirdParty/m1ddc/m1ddc

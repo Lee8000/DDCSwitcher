@@ -1,0 +1,77 @@
+diff --git a/sources/ioregistry.m b/sources/ioregistry.m
+index d1a4983..1e7680b 100644
+--- a/sources/ioregistry.m
++++ b/sources/ioregistry.m
+@@ -37,14 +37,21 @@ static Boolean isMCDP29XXProxy(io_service_t proxy) {
+ 
+ CGDisplayCount getOnlineDisplayInfos(DisplayInfos* displayInfos) {
+     // Getting online display list and count
+-    CGDisplayCount screenCount;
++    CGDisplayCount screenCount = 0;
+     CGDirectDisplayID screenList[MAX_DISPLAYS];
+-    CGGetOnlineDisplayList(MAX_DISPLAYS, screenList, &screenCount);
++    if (CGGetOnlineDisplayList(MAX_DISPLAYS, screenList, &screenCount) != kCGErrorSuccess) {
++        return 0;
++    }
+ 
+     int validDisplayCount = 0;
+     // Fetching each display infos from IOKit
+     for (int i = 0; i < (int)screenCount && validDisplayCount < MAX_DISPLAYS; i++) {
++        // DDCSwitcher only targets external monitors; never offer the built-in panel.
++        if (CGDisplayIsBuiltin(screenList[i])) {
++            continue;
++        }
+         DisplayInfos *currDisplay = displayInfos + validDisplayCount;
++        *currDisplay = (DisplayInfos){0};
+         currDisplay->id = screenList[i];
+ 
+         // This is a private API, but it's a shortcut to get the system UUID
+diff --git a/sources/m1ddc.m b/sources/m1ddc.m
+index 4b30fa7..90c388c 100644
+--- a/sources/m1ddc.m
++++ b/sources/m1ddc.m
+@@ -11,7 +11,9 @@
+ // -- Generic utility functions
+ 
+ static void writeToStdOut(NSString *text) {
+-    [text writeToFile:@"/dev/stdout" atomically:NO encoding:NSUTF8StringEncoding error:nil];
++    // DDCSwitcher: normal stdio preserves all lines when stdout is a regular file.
++    fputs([text UTF8String], stdout);
++    fflush(stdout);
+ }
+ 
+ static void printUsage() {
+diff --git a/sources/i2c.m b/sources/i2c.m
+index 08d7303..9ed7c8f 100644
+--- a/sources/i2c.m
++++ b/sources/i2c.m
+@@ -3,17 +3,6 @@
+ #include "i2c.h"
+ #include "utils.h"
+ 
+-static int getBytesUsed(UInt8* data) {
+-    int bytes = 0;
+-    // Check up to DDC_BUFFER_SIZE bytes, not sizeof(data) which is just pointer size
+-    for (int i = 0; i < DDC_BUFFER_SIZE; ++i) {
+-        if (data[i] != 0) {
+-            bytes = i + 1;
+-        }
+-    }
+-    return bytes;
+-}
+-
+ // Function to get ready for DDC operations for a specific display attribute
+ DDCPacket createDDCPacket(UInt8 attrCode) {
+     DDCPacket packet = {};
+@@ -51,7 +40,10 @@ IOReturn performDDCWriteAtChipAddress(IOAVServiceRef avService, UInt32 chipAddre
+ 
+     for (int i = 0; i < DDC_ITERATIONS; ++i) {
+         usleep(DDC_WAIT);
+-        if ((ret = IOAVServiceWriteI2C(avService, chipAddress, packet->inputAddr, packet->data, getBytesUsed(packet->data)))) {
++        // The frame header encodes payload length. A checksum of zero is still
++        // a required byte and must never be trimmed as if it were padding.
++        uint32_t length = (packet->data[0] & 0x7F) + 2;
++        if ((ret = IOAVServiceWriteI2C(avService, chipAddress, packet->inputAddr, packet->data, length))) {
+             return ret;
+         }
+     }
