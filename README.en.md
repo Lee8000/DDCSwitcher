@@ -1,6 +1,8 @@
 # DDC Switcher
 
-A native macOS menu-bar app that switches external monitor inputs over DDC/CI using configurable global keyboard shortcuts.
+A native macOS menu-bar and Windows tray app that switches external monitor inputs over DDC/CI using configurable global keyboard shortcuts.
+
+**Windows 10/11 x64:** see the [Windows guide](windows/README.md). The portable app does not require an additional runtime. The sections below describe the macOS version.
 
 [中文说明](README.md) · [MIT license](LICENSE) · [Third-party notices](THIRD_PARTY.md)
 
@@ -12,7 +14,7 @@ A native macOS menu-bar app that switches external monitor inputs over DDC/CI us
 
 ## Download
 
-Get the app from [GitHub Releases](https://github.com/Lee8000/DDCSwitcher/releases/latest), or download [v1.0.0 for Apple Silicon](https://github.com/Lee8000/DDCSwitcher/releases/download/v1.0.0/DDCSwitcher-v1.0.0-macOS-arm64.zip) directly.
+Get the app from [GitHub Releases](https://github.com/Lee8000/DDCSwitcher/releases/latest): [Windows x64](https://github.com/Lee8000/DDCSwitcher/releases/download/v1.1.0/DDCSwitcher-v1.1.0-windows-x64.zip) or [macOS Apple Silicon](https://github.com/Lee8000/DDCSwitcher/releases/download/v1.1.0/DDCSwitcher-v1.1.0-macOS-arm64.zip).
 
 ## Use
 

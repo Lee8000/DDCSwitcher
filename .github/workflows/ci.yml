@@ -1,4 +1,4 @@
-name: macOS tests and build
+name: macOS and Windows tests and build
 
 on:
   push:
@@ -9,6 +9,30 @@ permissions:
   contents: read
 
 jobs:
+  windows-test-and-build:
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build Windows x64 app
+        shell: powershell
+        run: ./windows/scripts/build.ps1
+      - name: Run core and native Windows self-tests
+        shell: powershell
+        run: ./windows/scripts/test.ps1
+      - name: Package Windows app
+        shell: powershell
+        run: ./windows/scripts/package.ps1
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: DDCSwitcher-windows-x64
+          path: |
+            windows/dist/DDCSwitcher-windows-x64.zip
+            windows/build/native-self-test.txt
+          if-no-files-found: error
+          retention-days: 14
   test-and-build:
     runs-on: macos-14
     timeout-minutes: 20

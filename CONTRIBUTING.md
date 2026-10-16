@@ -2,6 +2,8 @@
 
 Bug reports, monitor compatibility reports and focused pull requests are welcome.
 
+Windows development and tests are documented in [windows/README.md](windows/README.md). The C++ core tests can run on macOS/Linux; Windows-native tests run on Windows CI. Keep Windows driver calls out of the UI thread and do not weaken unique-device mapping checks when topology is incomplete.
+
 For a monitor issue, include the Mac chip, macOS version, monitor model, direct/dock connection, selected control method/input code, and whether the same action works from the menu bar. Do not include credentials or monitor serial numbers in diagnostic logs.
 
 ## Development

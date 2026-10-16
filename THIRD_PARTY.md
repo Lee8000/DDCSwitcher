@@ -2,6 +2,8 @@
 
 DDC Switcher includes **m1ddc**, Copyright (c) 2021 waydabber, licensed under MIT.
 
+The m1ddc helper is bundled only with the macOS app. The native Windows app uses Windows system APIs and does not include or run m1ddc. Windows release builds statically link the MSVC runtime; users do not need a separate runtime installation. Both app icons originate from this project's generated icon design.
+
 - Upstream: https://github.com/waydabber/m1ddc
 - Pinned commit: `04d949794102eb8df01ad3681afff6464a3eede2`
 - Full original license: `ThirdParty/m1ddc/LICENSE`; also bundled as `Contents/Resources/m1ddc-LICENSE.txt`.

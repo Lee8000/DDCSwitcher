@@ -4,15 +4,25 @@ A native macOS menu-bar app for switching monitor inputs over DDC/CI with global
 
 English: [README.en.md](README.en.md)
 
-原生 macOS 菜单栏工具。为 HDMI、DisplayPort、USB-C 等输入源设置全局组合快捷键，也可直接从菜单栏切换。
+原生桌面工具：macOS 菜单栏版与 Windows 系统托盘版。为 HDMI、DisplayPort、USB-C 等输入源设置全局组合快捷键，也可直接从菜单选择输入源。
+
+| 平台 | 系统要求 | 使用说明 |
+| --- | --- | --- |
+| Windows | Windows 10/11 x64 | [Windows 版说明](windows/README.md) |
+| macOS | macOS 13+、Apple Silicon | 下方说明 |
+
+Windows 版无需额外运行时。macOS 与 Windows 各自保存显示器及快捷键配置。
 
 适用：**Apple Silicon（M1 及以后）Mac，macOS 13 或更新版本**。已验证的本地构建与软件测试环境为 Apple M4 / macOS 26.6.2。需要支持 DDC/CI 的外接显示器和能传递 DDC 信号的连接方式。无需 Homebrew、Python、辅助功能权限或屏幕录制权限。
 
 ## 下载
 
-前往 [GitHub Releases](https://github.com/Lee8000/DDCSwitcher/releases/latest) 下载应用，或直接下载 [v1.0.0 Apple Silicon 版本](https://github.com/Lee8000/DDCSwitcher/releases/download/v1.0.0/DDCSwitcher-v1.0.0-macOS-arm64.zip)。
+前往 [GitHub Releases](https://github.com/Lee8000/DDCSwitcher/releases/latest) 下载对应平台版本：
 
-## 开始使用
+- [Windows x64](https://github.com/Lee8000/DDCSwitcher/releases/download/v1.1.0/DDCSwitcher-v1.1.0-windows-x64.zip)
+- [macOS Apple Silicon](https://github.com/Lee8000/DDCSwitcher/releases/download/v1.1.0/DDCSwitcher-v1.1.0-macOS-arm64.zip)
+
+## macOS 开始使用
 
 1. 解压应用包，把 `DDCSwitcher.app` 放在“应用程序”或你希望长期保存的位置，然后双击打开。
 2. 在显示器自己的菜单中打开 **DDC/CI**。连接显示器后，在应用设置中点击“刷新显示器”。
